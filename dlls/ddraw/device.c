@@ -28,6 +28,7 @@
  */
 
 #include "ddraw_private.h"
+#include "wine/exception.h"
 
 WINE_DEFAULT_DEBUG_CHANNEL(ddraw);
 WINE_DECLARE_DEBUG_CHANNEL(winediag);
@@ -3924,7 +3925,15 @@ static void pack_strided_data(BYTE *dst, DWORD count, const D3DDRAWPRIMITIVESTRI
             if (src->textureCoords[tex].lpvData)
             {
                 offset = i * src->textureCoords[tex].dwStride;
-                memcpy(dst, ((BYTE *)src->textureCoords[tex].lpvData) + offset, attrib_count * sizeof(float));
+                __TRY
+                {
+                    memcpy(dst, ((BYTE *)src->textureCoords[tex].lpvData) + offset, attrib_count * sizeof(float));
+                }
+                __EXCEPT_PAGE_FAULT
+                {
+                    memset(dst, 0, attrib_count * sizeof(float));
+                }
+                __ENDTRY
             }
             else
             {
