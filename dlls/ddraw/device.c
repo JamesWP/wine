@@ -3921,8 +3921,15 @@ static void pack_strided_data(BYTE *dst, DWORD count, const D3DDRAWPRIMITIVESTRI
         for (tex = 0; tex < GET_TEXCOUNT_FROM_FVF(fvf); ++tex)
         {
             DWORD attrib_count = GET_TEXCOORD_SIZE_FROM_FVF(fvf, tex);
-            offset = i * src->textureCoords[tex].dwStride;
-            memcpy(dst, ((BYTE *)src->textureCoords[tex].lpvData) + offset, attrib_count * sizeof(float));
+            if (src->textureCoords[tex].lpvData)
+            {
+                offset = i * src->textureCoords[tex].dwStride;
+                memcpy(dst, ((BYTE *)src->textureCoords[tex].lpvData) + offset, attrib_count * sizeof(float));
+            }
+            else
+            {
+                memset(dst, 0, attrib_count * sizeof(float));
+            }
             dst += attrib_count * sizeof(float);
         }
     }
